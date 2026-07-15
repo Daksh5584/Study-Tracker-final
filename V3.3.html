@@ -1,0 +1,2518 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>JEE Slot Tracker V3.3 FINAL</title>
+  <style>
+    :root{
+      --bg:#0b1220;
+      --text:#e9eefc;
+      --muted:#aab6e6;
+      --accent:#7c5cff;
+      --good:#2ee59d;
+      --warn:#ffcc66;
+      --bad:#ff5c7a;
+      --line:rgba(255,255,255,0.10);
+      --shadow: 0 10px 30px rgba(0,0,0,0.35);
+      --radius:16px;
+    }
+    body{
+      margin:0;
+      background:
+        radial-gradient(1200px 600px at 20% -10%, rgba(124,92,255,0.25), transparent 60%),
+        radial-gradient(900px 500px at 100% 0%, rgba(46,229,157,0.15), transparent 55%),
+        var(--bg);
+      color:var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+    header{
+      position:sticky; top:0; z-index:10;
+      background: rgba(11,18,32,0.85);
+      backdrop-filter: blur(10px);
+      border-bottom:1px solid var(--line);
+    }
+    .wrap{max-width:1220px; margin:0 auto; padding:14px;}
+    .row{display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:space-between;}
+    h1{font-size:18px; margin:0;}
+    .sub{color:var(--muted); font-size:12px;}
+    nav{display:flex; gap:10px; flex-wrap:wrap;}
+    .tab{
+      border:1px solid var(--line);
+      background:transparent;
+      color:var(--text);
+      padding:8px 12px;
+      border-radius:999px;
+      cursor:pointer;
+      font-weight:900;
+      font-size:13px;
+    }
+    .tab.active{background:rgba(124,92,255,0.20); border-color:rgba(124,92,255,0.45);}
+
+    main{padding:16px 14px 40px;}
+    .grid{max-width:1220px; margin:0 auto; display:grid; grid-template-columns: 1fr; gap:14px;}
+    @media (min-width: 980px){
+      .grid.two{grid-template-columns: 1.25fr 0.75fr;}
+      .grid.four{grid-template-columns: 1fr 1fr;}
+    }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding:14px;
+    }
+    .card h2{font-size:15px; margin:0 0 10px;}
+    .muted{color:var(--muted); font-size:12px;}
+    .pill{
+      display:inline-flex; gap:8px; align-items:center;
+      padding:6px 10px; border-radius:999px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.03);
+      font-size:12px; color:var(--muted);
+      font-weight:900;
+    }
+    .btn{
+      cursor:pointer;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.06);
+      color:var(--text);
+      padding:10px 12px;
+      border-radius:12px;
+      font-weight:950;
+    }
+    .btn.primary{background: rgba(124,92,255,0.25); border-color:rgba(124,92,255,0.50);}
+    .btn.danger{background: rgba(255,92,122,0.12); border-color:rgba(255,92,122,0.35);}
+    .btn:active{transform: translateY(1px);}
+    .right{display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end;}
+    .hr{height:1px; background:var(--line); margin:10px 0;}
+
+    .kpi{display:flex; gap:10px; flex-wrap:wrap;}
+    .kpi .box{
+      flex:1; min-width:180px;
+      border:1px solid var(--line);
+      border-radius: 14px;
+      padding:12px;
+      background: rgba(255,255,255,0.03);
+    }
+    .big{font-size:22px; font-weight:950;}
+    .small{font-size:12px; color:var(--muted);}
+
+    .list{display:flex; flex-direction:column; gap:10px;}
+    .historyItem{
+      border:1px solid var(--line);
+      border-radius: 14px;
+      padding:12px;
+      background: rgba(255,255,255,0.03);
+      display:flex; flex-direction:column; gap:8px;
+    }
+    .badge{
+      font-size:12px; padding:6px 10px; border-radius:999px;
+      border:1px solid var(--line); background: rgba(255,255,255,0.03); color:var(--muted);
+      display:inline-flex; gap:8px; align-items:center; font-weight:950;
+    }
+    .tiny{font-size:11px; color:rgba(170,182,230,0.85); font-weight:800;}
+    .dangerText{color:#ffb3c2;}
+
+    .form{display:grid; grid-template-columns:1fr; gap:10px;}
+    @media(min-width:980px){
+      .form.cols2{grid-template-columns:1fr 1fr;}
+      .form.cols3{grid-template-columns:1fr 1fr 1fr;}
+      .form.cols4{grid-template-columns:1fr 1fr 1fr 1fr;}
+    }
+    label{font-size:12px; color:var(--muted); display:block; margin-bottom:6px; font-weight:900;}
+    input, select, textarea{
+      width:100%; box-sizing:border-box;
+      background: rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.10);
+      color: var(--text);
+      padding:10px;
+      border-radius: 12px;
+      outline:none;
+    }
+    textarea{min-height:72px; resize:vertical;}
+
+    .slot{
+      border:1px solid var(--line);
+      border-radius: 14px;
+      padding:12px;
+      background: rgba(15,26,51,0.55);
+      display:flex; flex-direction:column; gap:10px;
+    }
+    .slotHeader{display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; align-items:center;}
+    .slotName{font-weight:950;}
+    .statusDot{width:10px; height:10px; border-radius:99px; background:rgba(255,255,255,0.15); display:inline-block;}
+    .dotDone{background: var(--good);}
+    .dotPartial{background: var(--warn);}
+    .dotNo{background: var(--bad);}
+    .rangeRow{display:flex; gap:10px; align-items:center;}
+    input[type="range"]{padding:0; border:none;}
+
+    details.chapter{
+      border:1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.03);
+      overflow:hidden;
+    }
+    details.chapter summary{
+      cursor:pointer;
+      list-style:none;
+      padding:12px;
+      display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; align-items:center;
+      font-weight:950;
+    }
+    details.chapter summary::-webkit-details-marker{display:none;}
+    .chapterBody{padding:12px; border-top:1px solid var(--line);}
+    .checkRow{display:flex; gap:12px; flex-wrap:wrap; align-items:center;}
+    .checkRow .c{
+      display:flex; gap:8px; align-items:center;
+      border:1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.03);
+      padding:8px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:900;
+      color:rgba(233,238,252,0.90);
+    }
+    .checkRow input{width:auto;}
+
+    canvas{width:100%; height:260px; background: rgba(255,255,255,0.02); border:1px solid var(--line); border-radius: 14px;}
+
+    .toast{
+      position: fixed; bottom: 16px; left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.78);
+      border: 1px solid rgba(255,255,255,0.12);
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-weight: 950;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s ease;
+      max-width: 92vw;
+    }
+    .toast.show{opacity: 1;}
+  </style>
+</head>
+
+<body>
+<header>
+  <div class="wrap">
+    <div class="row">
+      <div>
+        <h1>JEE Slot Tracker V3.3 FINAL</h1>
+        <div class="sub">Fixed: Distraction + Error log + Stable GitHub Gist Sync • Best on HTTPS (GitHub Pages)</div>
+      </div>
+      <nav>
+        <button class="tab active" data-page="today">Today</button>
+        <button class="tab" data-page="todo">To‑Do</button>
+        <button class="tab" data-page="chapters">Chapters</button>
+        <button class="tab" data-page="history">History</button>
+        <button class="tab" data-page="analytics">Analytics</button>
+        <button class="tab" data-page="reports">Reports</button>
+        <button class="tab" data-page="backlog">Backlog</button>
+        <button class="tab" data-page="errors">Error Log</button>
+        <button class="tab" data-page="tests">Tests</button>
+        <button class="tab" data-page="settings">Settings</button>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div id="app" class="grid"></div>
+</main>
+
+<div id="toast" class="toast">Saved</div>
+
+<script>
+/* =======================
+   CONFIG / DEFAULTS
+======================= */
+
+const STORAGE_KEY = "jee_slot_tracker_v3_3_final";
+
+const DEFAULT_TIMETABLE = [
+  { id:"slot1", name:"Slot 1", start:"06:30", end:"08:30", track:true, defaultActivity:"Revision" },
+  { id:"chores", name:"Morning chores", start:"08:30", end:"09:30", track:false, defaultActivity:"" },
+  { id:"slot2", name:"Slot 2", start:"09:30", end:"11:30", track:true, defaultActivity:"Practice" },
+  { id:"slot3", name:"Slot 3", start:"11:30", end:"12:30", track:true, defaultActivity:"Doubts/Review" },
+  { id:"lunch", name:"Lunch & game", start:"12:30", end:"13:30", track:false, defaultActivity:"" },
+  { id:"slot4", name:"Slot 4", start:"13:30", end:"16:00", track:true, defaultActivity:"Practice" },
+  { id:"coaching", name:"Coaching (online)", start:"16:00", end:"19:20", track:true, defaultActivity:"Lecture" },
+  { id:"slot5", name:"Slot 5", start:"19:20", end:"20:30", track:true, defaultActivity:"Homework/DPP" },
+  { id:"dinner", name:"Dinner & walk", start:"20:30", end:"21:50", track:false, defaultActivity:"" },
+  { id:"slot6", name:"Slot 6", start:"21:50", end:"23:20", track:true, defaultActivity:"Revision/Finish" },
+  { id:"sleep", name:"Sleep", start:"23:30", end:"06:00", track:false, defaultActivity:"" },
+];
+
+const SUBJECTS = ["Physics","Physical Chem","Inorganic Chem","Organic Chem","Maths","Other"];
+const ACTIVITIES = ["Lecture","Revision","Practice","PYQ","Notes","Test","Doubts","Backlog"];
+const TASK_TYPES = ["DPP","Module","Sheet","PYQ","Notes","Test Analysis","Other"];
+const PRIORITIES = ["High","Medium","Low"];
+const MISTAKE_TYPES = ["Concept","Calculation","Silly","Time","Formula","Other"];
+const CHAPTER_LEVELS = ["Theory Basic","Mains","Between Mains & Advanced","Advanced","Advanced+"];
+
+const CHAPTER_CHECK_KEYS = [
+  ["ex1","Module Ex-1"],
+  ["ex2","Module Ex-2"],
+  ["ex3","Module Ex-3"],
+  ["fullDPP","Full DPP"],
+  ["pyqM","PYQ Mains"],
+  ["pyqA","PYQ Adv"],
+  ["rev1","Revision R1"],
+  ["rev2","Revision R2"],
+  ["rev3","Revision R3"],
+  ["shortNotes","Short Notes"],
+];
+
+const ALL_CHAPTERS = {
+  "Physics": ["Units & Dimensions","Errors & Measurements","Vectors","Kinematics","Laws of Motion (NLM)","Friction","Work, Power & Energy","Circular Motion","Center of Mass","Impulse & Collision","Rotational Motion","Gravitation","Properties of Solids","Properties of Fluids","Thermal Properties of Matter","Thermodynamics","Kinetic Theory of Gases","SHM (Oscillations)","Waves (Sound)","Electrostatics","Capacitance","Current Electricity","Moving Charges & Magnetism","Magnetism & Matter","Electromagnetic Induction (EMI)","Alternating Current (AC)","Electromagnetic Waves","Ray Optics","Wave Optics","Dual Nature of Matter","Atoms","Nuclei","Semiconductors","Communication Systems","Experimental Physics"],
+  "Physical Chem": ["Mole Concept","Atomic Structure","Chemical Bonding","States of Matter","Thermodynamics (Chem)","Thermochemistry","Chemical & Ionic Equilibrium","Redox Reactions","Solutions","Electrochemistry","Chemical Kinetics","Solid State","Surface Chemistry"],
+  "Inorganic Chem": ["Periodic Table & Periodicity","Hydrogen","s-Block Elements","p-Block (Group 13)","p-Block (Group 14)","p-Block (Group 15)","p-Block (Group 16)","p-Block (Group 17)","p-Block (Group 18)","d-Block Elements","f-Block Elements","Coordination Compounds","Metallurgy","Qualitative Analysis (Salt Analysis)","Environmental Chemistry"],
+  "Organic Chem": ["General Organic Chemistry (GOC)","Isomerism","Hydrocarbons","Aromatic Compounds (Benzene)","Haloalkanes & Haloarenes","Alcohols, Phenols & Ethers","Aldehydes & Ketones","Carboxylic Acids & Derivatives","Amines","Biomolecules","Polymers","Chemistry in Everyday Life","Practical Organic Chemistry (POC)"],
+  "Maths": ["Sets, Relations & Functions","Trigonometry","Inverse Trigonometric Functions","Complex Numbers","Quadratic Equations","Sequence & Series","Permutations & Combinations","Binomial Theorem","Matrices","Determinants","Straight Lines","Pair of Straight Lines","Circle","Parabola","Ellipse","Hyperbola","Vectors","3D Geometry","Limits","Continuity & Differentiability","Differentiation","Application of Derivatives","Indefinite Integration","Definite Integration","Area Under Curve","Differential Equations","Probability","Statistics","Mathematical Reasoning","Linear Programming"]
+};
+
+function uid(prefix="id"){
+  return prefix + "_" + Math.random().toString(16).slice(2) + "_" + Date.now().toString(16);
+}
+
+/* =======================
+   DB
+======================= */
+function defaultChecks(){
+  return { ex1:false, ex2:false, ex3:false, fullDPP:false, pyqM:false, pyqA:false, rev1:false, rev2:false, rev3:false, shortNotes:false };
+}
+function emptyDB(){
+  return {
+    meta: { deviceId: uid("dev"), updatedAt: Date.now(), lastCloudSyncAt: 0, lastCloudError: "" },
+    settings: {
+      timetable: DEFAULT_TIMETABLE,
+      focusScaleMax: 5,
+      streakMinMins: 240,
+      remindersEnabled: false,
+      reminderOffsetMins: 2,
+      reminderOnlyIfNotUpdated: true,
+      github: { enabled:false, gistId:"", token:"", autoSync:false }
+    },
+    logs: {},
+    todos: {},
+    chapters: [],
+    backlog: [],
+    errorLog: [],
+    tests: [],
+    dayNotes: {},
+    reflections: {}
+  };
+}
+
+function loadDB(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return emptyDB();
+    const db = JSON.parse(raw);
+
+    if(!db.meta) db.meta = emptyDB().meta;
+    if(!db.settings) db.settings = emptyDB().settings;
+    if(!db.settings.timetable) db.settings.timetable = DEFAULT_TIMETABLE;
+
+    db.settings.focusScaleMax = 5;
+
+    if(!db.settings.github) db.settings.github = { enabled:false, gistId:"", token:"", autoSync:false };
+    if(typeof db.settings.remindersEnabled !== "boolean") db.settings.remindersEnabled = false;
+    if(typeof db.settings.reminderOffsetMins !== "number") db.settings.reminderOffsetMins = 2;
+    if(typeof db.settings.reminderOnlyIfNotUpdated !== "boolean") db.settings.reminderOnlyIfNotUpdated = true;
+
+    if(!db.logs) db.logs = {};
+    if(!db.todos) db.todos = {};
+    if(!db.chapters) db.chapters = [];
+    if(!db.backlog) db.backlog = [];
+    if(!db.errorLog) db.errorLog = [];
+    if(!db.tests) db.tests = [];
+    if(!db.dayNotes) db.dayNotes = {};
+    if(!db.reflections) db.reflections = {};
+
+    // migrate chapters
+    db.chapters.forEach(ch=>{
+      if(!ch.checks) ch.checks = defaultChecks();
+      for(const [k] of CHAPTER_CHECK_KEYS){
+        if(typeof ch.checks[k] !== "boolean") ch.checks[k] = false;
+      }
+      if(!ch.level) ch.level = "Theory Basic";
+      if(!ch.updatedAt) ch.updatedAt = Date.now();
+    });
+
+    return db;
+  }catch(e){
+    return emptyDB();
+  }
+}
+
+let DB = loadDB();
+
+function saveDB(){
+  DB.meta.updatedAt = Date.now();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(DB));
+  try{ queueGistPush(); }catch(e){}
+}
+
+function seedChaptersIfEmpty(){
+  if(DB.chapters && DB.chapters.length) return;
+  const out = [];
+  for(const [subj, list] of Object.entries(ALL_CHAPTERS)){
+    for(const name of list){
+      out.push({ id: uid("ch"), subject: subj, name, level: "Theory Basic", checks: defaultChecks(), createdAt: Date.now(), updatedAt: Date.now() });
+    }
+  }
+  out.sort((a,b)=> (a.subject+a.name).localeCompare(b.subject+b.name));
+  DB.chapters = out;
+  saveDB();
+}
+seedChaptersIfEmpty();
+
+/* =======================
+   HELPERS
+======================= */
+const $ = (sel, root=document) => root.querySelector(sel);
+const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+function toast(msg){
+  const el = $("#toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  setTimeout(()=> el.classList.remove("show"), 1100);
+}
+function pad2(n){ return String(n).padStart(2,"0"); }
+function todayKey(d=new Date()){
+  return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+}
+function dateKeyToDate(k){
+  const [y,m,d] = k.split("-").map(Number);
+  return new Date(y, m-1, d);
+}
+function formatDateHuman(k){
+  return dateKeyToDate(k).toLocaleDateString(undefined, { weekday:"short", year:"numeric", month:"short", day:"numeric" });
+}
+function hmToMin(hm){
+  const [h,m] = hm.split(":").map(Number);
+  return h*60+m;
+}
+function minutesBetween(startHHMM, endHHMM){
+  let s = hmToMin(startHHMM);
+  let e = hmToMin(endHHMM);
+  if(e < s) e += 24*60;
+  return e - s;
+}
+function clamp(n,a,b){ return Math.max(a, Math.min(b, n)); }
+function escapeHtml(str){
+  str = String(str ?? "");
+  return str.replace(/[&<>"']/g, s => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[s]));
+}
+function trackableSlots(){ return DB.settings.timetable.filter(s=>s.track); }
+
+function getLog(dateKey){
+  if(!DB.logs[dateKey]) DB.logs[dateKey] = {};
+  return DB.logs[dateKey];
+}
+function getEntry(dateKey, slotId){
+  return getLog(dateKey)[slotId] || null;
+}
+function setEntry(dateKey, slotId, entry){
+  getLog(dateKey)[slotId] = entry;
+  saveDB();
+}
+function deleteEntry(dateKey, slotId){
+  delete getLog(dateKey)[slotId];
+  saveDB();
+}
+function getTodos(dateKey){
+  if(!DB.todos[dateKey]) DB.todos[dateKey] = [];
+  return DB.todos[dateKey];
+}
+function todosSummary(dateKey){
+  const t = getTodos(dateKey);
+  return { total:t.length, done:t.filter(x=>x.done).length };
+}
+
+function computeDaySummary(dateKey){
+  const slots = trackableSlots();
+  const day = getLog(dateKey);
+
+  let completed=0, totalMins=0;
+  let focusSum=0, focusCnt=0;
+  let qA=0,qC=0,qW=0;
+  let distraction=0;
+
+  for(const s of slots){
+    const e = day[s.id];
+    if(!e) continue;
+    if(e.done==="done") completed++;
+    totalMins += Number(e.minutes||0);
+    if(e.focus && e.done!=="no"){ focusSum += Number(e.focus); focusCnt++; }
+    qA += Number(e.qAttempted||0);
+    qC += Number(e.qCorrect||0);
+    qW += Number(e.qWrong||0);
+    distraction += Number(e.distractionMins||0);
+  }
+
+  return {
+    totalMins,
+    focusAvg: focusCnt ? focusSum/focusCnt : 0,
+    qA,qC,qW,
+    acc: qA ? (qC/qA)*100 : 0,
+    completionPct: slots.length ? (completed/slots.length)*100 : 0,
+    completed,
+    totalSlots: slots.length,
+    distraction
+  };
+}
+
+function chapterProgress(ch){
+  const keys = CHAPTER_CHECK_KEYS.map(x=>x[0]);
+  const done = keys.filter(k=>!!ch.checks?.[k]).length;
+  return { done, total: keys.length, pct: keys.length ? (done/keys.length)*100 : 0 };
+}
+
+/* =======================
+   GITHUB GIST SYNC (STABLE)
+======================= */
+
+let gistPushTimer = null;
+
+function githubEnabled(){ return !!DB.settings.github?.enabled; }
+function hasGistCreds(){
+  const g = DB.settings.github;
+  return g && g.gistId && g.token;
+}
+function isHttpsContext(){
+  // file:// pe GitHub API unreliable (Origin null)
+  return location.protocol === "https:" || location.hostname === "localhost";
+}
+function ghHeaders(){
+  const tok = DB.settings.github.token;
+  return {
+    "Authorization": `token ${tok}`,
+    "Accept": "application/vnd.github+json",
+    "Content-Type": "application/json"
+  };
+}
+async function ghFetch(url, opts){
+  const res = await fetch(url, opts);
+  const txt = await res.text();
+  let data = null;
+  try{ data = txt ? JSON.parse(txt) : null; }catch(e){}
+  if(!res.ok){
+    const msg = `HTTP ${res.status}` + (data?.message ? `: ${data.message}` : "");
+    throw new Error(msg);
+  }
+  return data;
+}
+async function gistGet(){
+  const id = encodeURIComponent(DB.settings.github.gistId);
+  return await ghFetch(`https://api.github.com/gists/${id}`, { headers: ghHeaders() });
+}
+async function gistPatch(contentObj){
+  const id = encodeURIComponent(DB.settings.github.gistId);
+  return await ghFetch(`https://api.github.com/gists/${id}`, {
+    method: "PATCH",
+    headers: ghHeaders(),
+    body: JSON.stringify({
+      files: { "jee-tracker.json": { content: JSON.stringify(contentObj, null, 2) } }
+    })
+  });
+}
+
+function setCloudError(msg){
+  DB.meta.lastCloudError = msg || "";
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(DB));
+}
+
+async function gistPull(showToast=true){
+  if(!githubEnabled()) return showToast && toast("GitHub sync OFF");
+  if(!hasGistCreds()) return showToast && toast("Set Gist ID + Token");
+  if(!isHttpsContext()) return showToast && toast("Open app on HTTPS (GitHub Pages). file:// sync unstable");
+
+  const data = await gistGet();
+  const file = data.files?.["jee-tracker.json"];
+  if(!file?.content) { showToast && toast("jee-tracker.json missing in gist"); return; }
+
+  const remoteDB = JSON.parse(file.content);
+
+  DB = remoteDB;
+  if(!DB.settings) DB.settings = emptyDB().settings;
+  DB.settings.focusScaleMax = 5; // fixed
+  if(!DB.settings.github) DB.settings.github = { enabled:false, gistId:"", token:"", autoSync:false };
+
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(DB));
+  setCloudError("");
+  if(showToast) toast("Pulled from GitHub gist");
+  render();
+}
+
+async function gistPush(showToast=true){
+  if(!githubEnabled()) return showToast && toast("GitHub sync OFF");
+  if(!hasGistCreds()) return showToast && toast("Set Gist ID + Token");
+  if(!isHttpsContext()) return showToast && toast("Open app on HTTPS (GitHub Pages). file:// sync unstable");
+
+  await gistPatch(DB);
+  DB.meta.lastCloudSyncAt = Date.now();
+  setCloudError("");
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(DB));
+  if(showToast) toast("Pushed to GitHub gist");
+}
+
+async function gistSmartSync(showToast=true){
+  if(!githubEnabled()) return showToast && toast("GitHub sync OFF");
+  if(!hasGistCreds()) return showToast && toast("Set Gist ID + Token");
+  if(!isHttpsContext()) return showToast && toast("Open app on HTTPS (GitHub Pages). file:// sync unstable");
+
+  const data = await gistGet();
+  const file = data.files?.["jee-tracker.json"];
+
+  if(!file?.content){
+    await gistPatch(DB);
+    DB.meta.lastCloudSyncAt = Date.now();
+    setCloudError("");
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(DB));
+    showToast && toast("SmartSync: pushed (cloud empty)");
+    return;
+  }
+
+  const remoteDB = JSON.parse(file.content);
+  const r = Number(remoteDB?.meta?.updatedAt || 0);
+  const l = Number(DB?.meta?.updatedAt || 0);
+
+  if(r > l){
+    DB = remoteDB;
+    if(!DB.settings) DB.settings = emptyDB().settings;
+    DB.settings.focusScaleMax = 5;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(DB));
+    setCloudError("");
+    showToast && toast("SmartSync: pulled newer cloud");
+    render();
+  }else if(l > r){
+    await gistPatch(DB);
+    DB.meta.lastCloudSyncAt = Date.now();
+    setCloudError("");
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(DB));
+    showToast && toast("SmartSync: pushed newer local");
+  }else{
+    showToast && toast("SmartSync: already same");
+  }
+}
+
+// Throttled push on save (prevents GitHub secondary rate-limit)
+function queueGistPush(){
+  if(!githubEnabled()) return;
+  if(!DB.settings.github.autoSync) return;
+  if(!hasGistCreds()) return;
+  if(!isHttpsContext()) return;
+
+  const last = Number(DB.meta.lastCloudSyncAt || 0);
+  if(Date.now() - last < 15000) return; // 15 sec throttle
+
+  if(gistPushTimer) clearTimeout(gistPushTimer);
+  gistPushTimer = setTimeout(async ()=>{
+    try{
+      await gistPatch(DB);
+      DB.meta.lastCloudSyncAt = Date.now();
+      setCloudError("");
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(DB));
+    }catch(e){
+      setCloudError(e.message || "Sync failed");
+    }
+  }, 2000);
+}
+
+// background smart sync: conservative (2 min)
+async function gistSmartSyncSilent(){
+  try{
+    if(!githubEnabled()) return;
+    if(!DB.settings.github.autoSync) return;
+    if(!hasGistCreds()) return;
+    if(!isHttpsContext()) return;
+
+    const data = await gistGet();
+    const file = data.files?.["jee-tracker.json"];
+    if(!file?.content){
+      await gistPatch(DB);
+      DB.meta.lastCloudSyncAt = Date.now();
+      setCloudError("");
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(DB));
+      return;
+    }
+    const remoteDB = JSON.parse(file.content);
+    const r = Number(remoteDB?.meta?.updatedAt || 0);
+    const l = Number(DB?.meta?.updatedAt || 0);
+
+    if(r > l){
+      DB = remoteDB;
+      DB.settings.focusScaleMax = 5;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(DB));
+      setCloudError("");
+      render();
+    }else if(l > r){
+      // only push if 15 sec passed
+      const last = Number(DB.meta.lastCloudSyncAt || 0);
+      if(Date.now() - last < 15000) return;
+      await gistPatch(DB);
+      DB.meta.lastCloudSyncAt = Date.now();
+      setCloudError("");
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(DB));
+    }
+  }catch(e){
+    setCloudError(e.message || "Sync failed");
+  }
+}
+document.addEventListener("visibilitychange", ()=>{
+  if(!document.hidden) gistSmartSyncSilent();
+});
+setInterval(()=>{ if(!document.hidden) gistSmartSyncSilent(); }, 120000);
+
+/* =======================
+   REMINDERS (in-app)
+======================= */
+let reminderTimers = [];
+function clearReminders(){
+  reminderTimers.forEach(t=>clearTimeout(t));
+  reminderTimers = [];
+}
+function slotUpdatedEnough(dateKey, slotId){
+  const e = getEntry(dateKey, slotId);
+  if(!e) return false;
+  return !!(e.updatedAt && (e.done!=="no" || (e.topic && e.topic.trim().length>0)));
+}
+function scheduleRemindersForToday(){
+  clearReminders();
+  if(!DB.settings.remindersEnabled) return;
+
+  const now = new Date();
+  const dateKey = todayKey(now);
+
+  for(const s of trackableSlots()){
+    const endMin = hmToMin(s.end);
+    const fireMin = endMin + Number(DB.settings.reminderOffsetMins||2);
+
+    const fire = new Date(now);
+    fire.setHours(0,0,0,0);
+    fire.setMinutes(fireMin);
+
+    if(fire.getTime() <= now.getTime()) continue;
+
+    const ms = fire.getTime() - now.getTime();
+    const id = setTimeout(()=>{
+      if(DB.settings.reminderOnlyIfNotUpdated && slotUpdatedEnough(dateKey, s.id)) return;
+      toast(`Reminder: Update ${s.name}`);
+    }, ms);
+
+    reminderTimers.push(id);
+  }
+}
+
+/* =======================
+   CHARTS (canvas)
+======================= */
+function clearCanvas(c){
+  const ctx = c.getContext("2d");
+  ctx.clearRect(0,0,c.width,c.height);
+  return ctx;
+}
+function roundRect(ctx, x, y, w, h, r, fill, stroke) {
+  if (typeof r === 'number') r = {tl:r,tr:r,br:r,bl:r};
+  ctx.beginPath();
+  ctx.moveTo(x + r.tl, y);
+  ctx.lineTo(x + w - r.tr, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r.tr);
+  ctx.lineTo(x + w, y + h - r.br);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r.br, y + h);
+  ctx.lineTo(x + r.bl, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r.bl);
+  ctx.lineTo(x, y + r.tl);
+  ctx.quadraticCurveTo(x, y, x + r.tl, y);
+  ctx.closePath();
+  if (fill) ctx.fill();
+  if (stroke) ctx.stroke();
+}
+function drawBarChart(canvas, labels, values, opts={}){
+  const ctx = clearCanvas(canvas);
+  const W=canvas.width, H=canvas.height;
+  const padL=60, padR=20, padT=24, padB=64;
+  const maxY = opts.maxY || Math.max(1, ...values, 1);
+  const yLabel = opts.yLabel || "";
+
+  ctx.fillStyle="rgba(255,255,255,0.02)";
+  ctx.fillRect(0,0,W,H);
+
+  ctx.strokeStyle="rgba(255,255,255,0.18)";
+  ctx.beginPath(); ctx.moveTo(padL,padT); ctx.lineTo(padL,H-padB); ctx.lineTo(W-padR,H-padB); ctx.stroke();
+
+  ctx.font="12px system-ui";
+  for(let i=0;i<=5;i++){
+    const v=(maxY/5)*i;
+    const y=H-padB - ((H-padT-padB)*(v/maxY));
+    ctx.strokeStyle="rgba(255,255,255,0.10)";
+    ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(W-padR,y); ctx.stroke();
+    ctx.fillStyle="rgba(233,238,252,0.75)";
+    ctx.fillText(v.toFixed(0), 18, y+4);
+  }
+  if(yLabel){
+    ctx.save(); ctx.translate(16,H/2); ctx.rotate(-Math.PI/2);
+    ctx.fillStyle="rgba(170,182,230,0.85)";
+    ctx.fillText(yLabel,0,0);
+    ctx.restore();
+  }
+
+  const n=labels.length;
+  const chartW=W-padL-padR, chartH=H-padT-padB;
+  const barW=Math.max(10, chartW/(n*1.6));
+  const gap=(chartW-n*barW)/(n+1);
+
+  for(let i=0;i<n;i++){
+    const v=values[i]||0;
+    const h=chartH*(v/maxY);
+    const x=padL+gap+i*(barW+gap);
+    const y=(H-padB)-h;
+
+    const grad=ctx.createLinearGradient(0,y,0,y+h);
+    grad.addColorStop(0,"rgba(124,92,255,0.95)");
+    grad.addColorStop(1,"rgba(46,229,157,0.65)");
+    ctx.fillStyle=grad;
+    roundRect(ctx,x,y,barW,h,10,true,false);
+
+    ctx.fillStyle="rgba(233,238,252,0.9)";
+    const txt = opts.valueFmt ? opts.valueFmt(v) : v.toFixed(2);
+    ctx.fillText(txt, x, y-6);
+
+    ctx.save();
+    ctx.translate(x+barW/2, H-padB+12);
+    ctx.rotate(-Math.PI/7);
+    ctx.fillStyle="rgba(170,182,230,0.9)";
+    ctx.textAlign="center";
+    ctx.fillText(labels[i],0,22);
+    ctx.restore();
+  }
+}
+function drawLineChart(canvas, labels, values, opts={}){
+  const ctx = clearCanvas(canvas);
+  const W=canvas.width, H=canvas.height;
+  const padL=60, padR=20, padT=24, padB=64;
+  const maxY = Math.max(10, ...values);
+  const yLabel = opts.yLabel || "";
+
+  ctx.fillStyle="rgba(255,255,255,0.02)";
+  ctx.fillRect(0,0,W,H);
+
+  ctx.strokeStyle="rgba(255,255,255,0.18)";
+  ctx.beginPath(); ctx.moveTo(padL,padT); ctx.lineTo(padL,H-padB); ctx.lineTo(W-padR,H-padB); ctx.stroke();
+
+  ctx.font="12px system-ui";
+  for(let i=0;i<=5;i++){
+    const v=(maxY/5)*i;
+    const y=H-padB - ((H-padT-padB)*(v/maxY));
+    ctx.strokeStyle="rgba(255,255,255,0.10)";
+    ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(W-padR,y); ctx.stroke();
+    ctx.fillStyle="rgba(233,238,252,0.75)";
+    ctx.fillText(v.toFixed(0), 18, y+4);
+  }
+  if(yLabel){
+    ctx.save(); ctx.translate(16,H/2); ctx.rotate(-Math.PI/2);
+    ctx.fillStyle="rgba(170,182,230,0.85)";
+    ctx.fillText(yLabel,0,0);
+    ctx.restore();
+  }
+
+  const n=labels.length;
+  const chartW=W-padL-padR, chartH=H-padT-padB;
+  const stepX=chartW/Math.max(1,n-1);
+
+  ctx.lineWidth=3;
+  ctx.strokeStyle="rgba(124,92,255,0.95)";
+  ctx.beginPath();
+  for(let i=0;i<n;i++){
+    const v=values[i]||0;
+    const x=padL+i*stepX;
+    const y=H-padB - (chartH*(v/maxY));
+    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  }
+  ctx.stroke();
+
+  for(let i=0;i<n;i++){
+    const v=values[i]||0;
+    const x=padL+i*stepX;
+    const y=H-padB - (chartH*(v/maxY));
+    ctx.fillStyle="rgba(46,229,157,0.95)";
+    ctx.beginPath(); ctx.arc(x,y,5,0,Math.PI*2); ctx.fill();
+    if(i%2===0){
+      ctx.fillStyle="rgba(170,182,230,0.9)";
+      ctx.textAlign="center";
+      ctx.fillText(labels[i], x, H-padB+26);
+    }
+  }
+}
+function drawPieChart(canvas, labels, values){
+  const ctx = clearCanvas(canvas);
+  const W=canvas.width, H=canvas.height;
+
+  ctx.fillStyle="rgba(255,255,255,0.02)";
+  ctx.fillRect(0,0,W,H);
+
+  const total = values.reduce((a,b)=>a+(b||0),0);
+  if(total<=0){
+    ctx.fillStyle="rgba(170,182,230,0.8)";
+    ctx.font="16px system-ui";
+    ctx.fillText("No data yet", W*0.42, H*0.52);
+    return;
+  }
+
+  const cx=Math.round(W*0.34), cy=Math.round(H*0.50);
+  const rOuter=Math.min(W,H)*0.28, rInner=rOuter*0.55;
+
+  const colors=[
+    "rgba(124,92,255,0.95)","rgba(46,229,157,0.90)","rgba(255,204,102,0.90)",
+    "rgba(255,92,122,0.85)","rgba(170,182,230,0.75)","rgba(150,120,255,0.75)"
+  ];
+
+  let angle=-Math.PI/2;
+  for(let i=0;i<labels.length;i++){
+    const v=values[i]||0;
+    if(v<=0) continue;
+    const slice=(v/total)*Math.PI*2;
+    ctx.beginPath(); ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,rOuter,angle,angle+slice);
+    ctx.closePath();
+    ctx.fillStyle=colors[i%colors.length];
+    ctx.fill();
+    angle += slice;
+  }
+
+  ctx.globalCompositeOperation="destination-out";
+  ctx.beginPath(); ctx.arc(cx,cy,rInner,0,Math.PI*2); ctx.fill();
+  ctx.globalCompositeOperation="source-over";
+
+  ctx.fillStyle="rgba(233,238,252,0.95)";
+  ctx.font="18px system-ui";
+  ctx.textAlign="center";
+  ctx.fillText(`${total} min`, cx, cy+6);
+
+  ctx.textAlign="left";
+  ctx.font="13px system-ui";
+  let lx=Math.round(W*0.62), ly=Math.round(H*0.20);
+  for(let i=0;i<labels.length;i++){
+    const v=values[i]||0; if(v<=0) continue;
+    ctx.fillStyle=colors[i%colors.length];
+    ctx.fillRect(lx,ly-10,14,14);
+    ctx.fillStyle="rgba(233,238,252,0.9)";
+    const pct=((v/total)*100).toFixed(1);
+    ctx.fillText(`${labels[i]}: ${v} min (${pct}%)`, lx+22, ly+2);
+    ly += 22;
+  }
+}
+
+/* =======================
+   PAGES
+======================= */
+let currentPage = "today";
+let selectedDateKey = todayKey();
+let reportMode = "weekly";
+
+function render(){
+  const app = $("#app");
+  app.innerHTML = "";
+  $$(".tab").forEach(b => b.classList.toggle("active", b.dataset.page === currentPage));
+
+  if(currentPage === "today") renderToday(app);
+  if(currentPage === "todo") renderTodo(app);
+  if(currentPage === "chapters") renderChapters(app);
+  if(currentPage === "history") renderHistory(app);
+  if(currentPage === "analytics") renderAnalytics(app);
+  if(currentPage === "reports") renderReports(app);
+  if(currentPage === "backlog") renderBacklog(app);
+  if(currentPage === "errors") renderErrors(app);
+  if(currentPage === "tests") renderTests(app);
+  if(currentPage === "settings") renderSettings(app);
+}
+
+/* -------- TODAY -------- */
+function renderToday(root){
+  root.className = "grid two";
+  const left = document.createElement("div"); left.className="card";
+  const right = document.createElement("div"); right.className="card";
+
+  const dk = selectedDateKey;
+  const sum = computeDaySummary(dk);
+  const td = todosSummary(dk);
+
+  const dueErrorsCount = DB.errorLog.filter(e =>
+    e.status!=="fixed" && (e.reattempts||[]).some(r=>r.dateKey===dk && !r.done)
+  ).length;
+
+  const overdueBacklogCount = DB.backlog.filter(t =>
+    t.status!=="done" && t.dueDate && t.dueDate < dk
+  ).length;
+
+  left.innerHTML = `
+    <div class="row" style="align-items:flex-start;">
+      <div>
+        <h2>Today</h2>
+        <div class="pill"><strong>${formatDateHuman(dk)}</strong> <span style="opacity:.7">•</span> <span>${trackableSlots().length} slots</span></div>
+      </div>
+      <div class="right">
+        <button class="btn" id="prevDay">◀ Prev</button>
+        <button class="btn" id="goToday">Today</button>
+        <button class="btn" id="nextDay">Next ▶</button>
+      </div>
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="kpi">
+      <div class="box">
+        <div class="small">Study minutes</div>
+        <div class="big">${sum.totalMins}</div>
+        <div class="small">Completion: ${sum.completionPct.toFixed(0)}%</div>
+      </div>
+      <div class="box">
+        <div class="small">Avg focus</div>
+        <div class="big">${sum.focusAvg?sum.focusAvg.toFixed(2):"—"}</div>
+        <div class="small">Distraction: ${sum.distraction} min</div>
+      </div>
+      <div class="box">
+        <div class="small">Questions (A/C/W)</div>
+        <div class="big">${sum.qA}/${sum.qC}/${sum.qW}</div>
+        <div class="small">Accuracy: ${sum.qA?sum.acc.toFixed(1)+"%":"—"}</div>
+      </div>
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="pill"><strong>Due errors:</strong> ${dueErrorsCount}</div>
+    <div class="pill" style="margin-left:8px;"><strong>Overdue backlog:</strong> ${overdueBacklogCount}</div>
+
+    <div class="hr"></div>
+
+    <div class="list" id="slotList"></div>
+  `;
+
+  right.innerHTML = `
+    <h2>To‑Do (quick)</h2>
+    <div class="muted">Aaj ke tasks add/toggle quickly.</div>
+    <div class="hr"></div>
+    <div class="pill"><strong>${td.done}/${td.total}</strong> <span class="muted">done</span></div>
+
+    <div style="height:10px"></div>
+    <div class="form cols2">
+      <div><label>Task</label><input id="qTodoText" placeholder="e.g., Slot 2: 60 Q time-limit"/></div>
+      <div>
+        <label>Slot</label>
+        <select id="qTodoSlot">
+          <option value="any">Any</option>
+          ${trackableSlots().map(s=>`<option value="${s.id}">${escapeHtml(s.name)}</option>`).join("")}
+        </select>
+      </div>
+    </div>
+    <div class="right">
+      <button class="btn primary" id="qTodoAdd">Add</button>
+      <button class="btn" id="openTodo">Open To‑Do</button>
+    </div>
+
+    <div class="hr"></div>
+
+    <h2>Daily Notes</h2>
+    <div class="form cols2">
+      <div><label>Quick note</label><input id="noteText" placeholder="1 line note"/></div>
+      <div class="right" style="align-items:flex-end;"><button class="btn primary" id="noteAdd">Add note</button></div>
+    </div>
+    <div id="notesList" class="list"></div>
+
+    <div class="hr"></div>
+
+    <h2>Reflection</h2>
+    <div class="form">
+      <div><label>Win</label><input id="rWin" placeholder="1 line"/></div>
+      <div><label>Problem</label><input id="rProb" placeholder="1 line"/></div>
+      <div><label>Tomorrow plan</label><textarea id="rTom" placeholder="- ..."></textarea></div>
+      <div class="right"><button class="btn primary" id="rSave">Save reflection</button></div>
+    </div>
+
+    <div class="hr"></div>
+
+    <h2>Reminders</h2>
+    <div class="muted">In-app reminder: slot end + ${DB.settings.reminderOffsetMins} min (app open required).</div>
+    <div class="right" style="margin-top:10px;">
+      <button class="btn" id="reSched">Reschedule</button>
+      <button class="btn" id="toSettings">Settings</button>
+    </div>
+  `;
+
+  root.appendChild(left);
+  root.appendChild(right);
+
+  $("#prevDay").onclick = ()=>{ const d=dateKeyToDate(dk); d.setDate(d.getDate()-1); selectedDateKey=todayKey(d); render(); };
+  $("#nextDay").onclick = ()=>{ const d=dateKeyToDate(dk); d.setDate(d.getDate()+1); selectedDateKey=todayKey(d); render(); };
+  $("#goToday").onclick = ()=>{ selectedDateKey=todayKey(); render(); };
+
+  $("#qTodoAdd").onclick = ()=>{
+    const text = ($("#qTodoText").value||"").trim();
+    if(!text) return toast("Write a task");
+    const slotId = $("#qTodoSlot").value || "any";
+    getTodos(dk).unshift({ id: uid("todo"), slotId, text, done:false, createdAt: Date.now() });
+    saveDB();
+    $("#qTodoText").value="";
+    toast("Added");
+    render();
+  };
+  $("#openTodo").onclick = ()=>{ currentPage="todo"; render(); };
+
+  if(!DB.dayNotes[dk]) DB.dayNotes[dk] = [];
+  const notesList = $("#notesList");
+  function renderNotes(){
+    const notes = (DB.dayNotes[dk]||[]).slice().reverse();
+    if(!notes.length){ notesList.innerHTML = `<div class="muted">No notes.</div>`; return; }
+    notesList.innerHTML = "";
+    notes.forEach((n, revIdx)=>{
+      const idx = DB.dayNotes[dk].length - 1 - revIdx;
+      const div = document.createElement("div");
+      div.className="historyItem";
+      div.innerHTML = `
+        <div class="row" style="justify-content:space-between;">
+          <div class="muted">${new Date(n.t).toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"})}</div>
+          <button class="btn danger" data-delnote="${idx}">Del</button>
+        </div>
+        <div>${escapeHtml(n.text)}</div>
+      `;
+      notesList.appendChild(div);
+    });
+    $$("[data-delnote]").forEach(b=>{
+      b.onclick=()=>{
+        const i = Number(b.dataset.delnote);
+        DB.dayNotes[dk].splice(i,1);
+        saveDB();
+        toast("Deleted");
+        renderNotes();
+      };
+    });
+  }
+  renderNotes();
+
+  $("#noteAdd").onclick = ()=>{
+    const t = ($("#noteText").value||"").trim();
+    if(!t) return toast("Write note");
+    DB.dayNotes[dk].push({ t: Date.now(), text: t });
+    saveDB();
+    $("#noteText").value="";
+    toast("Note added");
+    renderNotes();
+  };
+
+  if(!DB.reflections[dk]) DB.reflections[dk] = { win:"", problem:"", tomorrow:"", updatedAt: 0 };
+  $("#rWin").value = DB.reflections[dk].win || "";
+  $("#rProb").value = DB.reflections[dk].problem || "";
+  $("#rTom").value = DB.reflections[dk].tomorrow || "";
+  $("#rSave").onclick = ()=>{
+    DB.reflections[dk] = {
+      win: ($("#rWin").value||"").trim(),
+      problem: ($("#rProb").value||"").trim(),
+      tomorrow: ($("#rTom").value||"").trim(),
+      updatedAt: Date.now()
+    };
+    saveDB();
+    toast("Saved reflection");
+  };
+
+  $("#reSched").onclick = ()=>{ scheduleRemindersForToday(); toast("Reminders scheduled"); };
+  $("#toSettings").onclick = ()=>{ currentPage="settings"; render(); };
+
+  const slotList = $("#slotList");
+  slotList.innerHTML = "";
+
+  for(const s of trackableSlots()){
+    const duration = minutesBetween(s.start, s.end);
+    const e = getEntry(dk, s.id);
+    const done = e?.done || "no";
+    const dot = done==="done" ? "dotDone" : done==="partial" ? "dotPartial" : "dotNo";
+
+    const el = document.createElement("div");
+    el.className = "slot";
+    el.innerHTML = `
+      <div class="slotHeader">
+        <div>
+          <div class="slotName"><span class="statusDot ${dot}"></span> ${escapeHtml(s.name)}</div>
+          <div class="muted">${s.start}–${s.end} • ${duration} min</div>
+        </div>
+        <div class="badge">${done.toUpperCase()}</div>
+      </div>
+
+      <div class="form cols3">
+        <div>
+          <label>Status</label>
+          <select data-f="done">
+            <option value="no" ${done==="no"?"selected":""}>Not done</option>
+            <option value="partial" ${done==="partial"?"selected":""}>Partial</option>
+            <option value="done" ${done==="done"?"selected":""}>Done</option>
+          </select>
+        </div>
+        <div>
+          <label>Subject</label>
+          <select data-f="subject">
+            ${SUBJECTS.map(x=>`<option value="${x}" ${(e?.subject===x)?"selected":""}>${x}</option>`).join("")}
+          </select>
+        </div>
+        <div>
+          <label>Activity</label>
+          <select data-f="activity">
+            ${ACTIVITIES.map(x=>`<option value="${x}" ${(e?.activity===x)?"selected":""}>${x}</option>`).join("")}
+          </select>
+        </div>
+      </div>
+
+      <div class="form cols2">
+        <div><label>Topic</label><input data-f="topic" value="${escapeHtml(e?.topic||"")}" placeholder="e.g., NLM friction"/></div>
+        <div><label>Minutes</label><input data-f="minutes" type="number" min="0" step="5" value="${escapeHtml(String(e?.minutes ?? duration))}"/></div>
+      </div>
+
+      <div class="form cols4">
+        <div>
+          <label>Focus (1–5)</label>
+          <div class="rangeRow">
+            <input data-f="focus" type="range" min="1" max="5" value="${escapeHtml(String(e?.focus ?? 3))}"/>
+            <span class="badge" data-live="fval">${escapeHtml(String(e?.focus ?? 3))}</span>
+          </div>
+        </div>
+        <div>
+          <label>Energy (1–5)</label>
+          <div class="rangeRow">
+            <input data-f="energy" type="range" min="1" max="5" value="${escapeHtml(String(e?.energy ?? 3))}"/>
+            <span class="badge" data-live="eval">${escapeHtml(String(e?.energy ?? 3))}</span>
+          </div>
+        </div>
+        <div>
+          <label>Distraction (mins)</label>
+          <input data-f="distractionMins" type="number" min="0" step="1" value="${escapeHtml(String(e?.distractionMins ?? 0))}"/>
+        </div>
+        <div>
+          <label>Accuracy</label>
+          <input disabled value="${(e?.qAttempted>0)? ((e.qCorrect/e.qAttempted)*100).toFixed(1)+"%" : "—"}"/>
+        </div>
+      </div>
+
+      <div class="form cols3">
+        <div><label>Attempted</label><input data-f="qA" type="number" min="0" value="${escapeHtml(String(e?.qAttempted ?? 0))}"/></div>
+        <div><label>Correct</label><input data-f="qC" type="number" min="0" value="${escapeHtml(String(e?.qCorrect ?? 0))}"/></div>
+        <div><label>Wrong</label><input data-f="qW" type="number" min="0" value="${escapeHtml(String(e?.qWrong ?? 0))}"/></div>
+      </div>
+
+      <div class="form">
+        <div><label>Notes</label><textarea data-f="notes">${escapeHtml(e?.notes||"")}</textarea></div>
+      </div>
+
+      <div class="right">
+        <button class="btn" data-act="addErr">+ Error</button>
+        <button class="btn danger" data-act="clear">Clear</button>
+        <button class="btn primary" data-act="save">Save</button>
+      </div>
+    `;
+
+    const focus = $('[data-f="focus"]', el);
+    const fval = $('[data-live="fval"]', el);
+    focus.oninput = ()=> fval.textContent = focus.value;
+
+    const energy = $('[data-f="energy"]', el);
+    const evalEl = $('[data-live="eval"]', el);
+    energy.oninput = ()=> evalEl.textContent = energy.value;
+
+    $('[data-act="save"]', el).onclick = ()=>{
+      const entry = {
+        done: $('[data-f="done"]', el).value,
+        subject: $('[data-f="subject"]', el).value,
+        activity: $('[data-f="activity"]', el).value,
+        topic: ($('[data-f="topic"]', el).value||"").trim(),
+        minutes: Number($('[data-f="minutes"]', el).value||0),
+        focus: Number($('[data-f="focus"]', el).value||3),
+        energy: Number($('[data-f="energy"]', el).value||3),
+        distractionMins: Number($('[data-f="distractionMins"]', el).value||0),
+        qAttempted: Number($('[data-f="qA"]', el).value||0),
+        qCorrect: Number($('[data-f="qC"]', el).value||0),
+        qWrong: Number($('[data-f="qW"]', el).value||0),
+        notes: ($('[data-f="notes"]', el).value||"").trim(),
+        updatedAt: Date.now()
+      };
+      entry.qAttempted = clamp(entry.qAttempted,0,1000000);
+      entry.qCorrect = clamp(entry.qCorrect,0,entry.qAttempted);
+      entry.qWrong = clamp(entry.qWrong,0,entry.qAttempted-entry.qCorrect);
+      entry.distractionMins = clamp(entry.distractionMins,0,1000000);
+
+      setEntry(dk, s.id, entry);
+      toast(`${s.name} saved`);
+      scheduleRemindersForToday();
+      render();
+    };
+
+    $('[data-act="clear"]', el).onclick = ()=>{
+      if(!confirm(`Clear ${s.name} for ${dk}?`)) return;
+      deleteEntry(dk, s.id);
+      toast("Cleared");
+      scheduleRemindersForToday();
+      render();
+    };
+
+    $('[data-act="addErr"]', el).onclick = ()=>{
+      const subject = $('[data-f="subject"]', el).value || "Other";
+      const chapter = ($('[data-f="topic"]', el).value||"").trim() || "Unknown";
+      const correctConcept = ($('[data-f="notes"]', el).value||"").trim() || "Write correct concept here";
+
+      const base = dateKeyToDate(dk);
+      const d3 = new Date(base); d3.setDate(d3.getDate()+3);
+      const d10 = new Date(base); d10.setDate(d10.getDate()+10);
+      const d21 = new Date(base); d21.setDate(d21.getDate()+21);
+
+      DB.errorLog.unshift({
+        id: uid("err"),
+        createdAt: Date.now(),
+        dateKey: dk,
+        subject, chapter,
+        source: "Slot work",
+        qRef: "",
+        mistakeType: "Concept",
+        correctConcept,
+        takeaway: "",
+        status: "open",
+        reattempts: [
+          { dateKey: todayKey(d3), done:false },
+          { dateKey: todayKey(d10), done:false },
+          { dateKey: todayKey(d21), done:false },
+        ]
+      });
+      saveDB();
+      toast("Added to Error Log");
+      currentPage="errors";
+      render();
+    };
+
+    slotList.appendChild(el);
+  }
+}
+
+/* -------- TODO -------- */
+function renderTodo(root){
+  root.className = "grid two";
+  const left = document.createElement("div"); left.className="card";
+  const right = document.createElement("div"); right.className="card";
+
+  const dk = selectedDateKey;
+  const sum = todosSummary(dk);
+
+  left.innerHTML = `
+    <div class="row">
+      <div>
+        <h2>Daily To‑Do</h2>
+        <div class="muted">Slot-wise tasks. Carry forward unfinished too.</div>
+      </div>
+      <div class="right">
+        <input id="todoDate" type="date" value="${escapeHtml(dk)}"/>
+        <button class="btn" id="todoToday">Today</button>
+      </div>
+    </div>
+    <div class="hr"></div>
+
+    <div class="pill"><strong>${sum.done}/${sum.total}</strong> <span class="muted">done</span></div>
+
+    <div class="hr"></div>
+
+    <div class="form cols2">
+      <div><label>Task</label><input id="todoText" placeholder="e.g., Slot 4: Ex-2 20Q + revise"/></div>
+      <div>
+        <label>Slot</label>
+        <select id="todoSlot">
+          <option value="any">Any</option>
+          ${trackableSlots().map(s=>`<option value="${s.id}">${escapeHtml(s.name)}</option>`).join("")}
+        </select>
+      </div>
+    </div>
+
+    <div class="right">
+      <button class="btn primary" id="todoAdd">Add</button>
+      <button class="btn" id="carry">Carry forward (yesterday → today)</button>
+    </div>
+  `;
+
+  right.innerHTML = `
+    <h2>Tasks</h2>
+    <div class="muted">Toggle done/undone. Delete if not needed.</div>
+    <div class="hr"></div>
+    <div id="todoList" class="list"></div>
+  `;
+
+  root.appendChild(left);
+  root.appendChild(right);
+
+  $("#todoDate").onchange = ()=>{ selectedDateKey = $("#todoDate").value || todayKey(); render(); };
+  $("#todoToday").onclick = ()=>{ selectedDateKey = todayKey(); render(); };
+
+  $("#todoAdd").onclick = ()=>{
+    const text = ($("#todoText").value||"").trim();
+    if(!text) return toast("Write a task");
+    const slotId = $("#todoSlot").value || "any";
+    getTodos(dk).unshift({ id: uid("todo"), slotId, text, done:false, createdAt: Date.now() });
+    saveDB();
+    $("#todoText").value="";
+    toast("Added");
+    renderTodo(root);
+  };
+
+  $("#carry").onclick = ()=>{
+    const d = dateKeyToDate(dk); d.setDate(d.getDate()-1);
+    const yk = todayKey(d);
+    const y = getTodos(yk).filter(t=>!t.done);
+    if(!y.length) return toast("No unfinished yesterday");
+    const cur = getTodos(dk);
+    y.slice().reverse().forEach(t=>{
+      cur.unshift({ id: uid("todo"), slotId:t.slotId, text:t.text, done:false, createdAt: Date.now() });
+    });
+    saveDB();
+    toast("Carried forward");
+    renderTodo(root);
+  };
+
+  const host = $("#todoList");
+  const arr = getTodos(dk);
+  const slotMap = new Map(DB.settings.timetable.map(s=>[s.id,s.name]));
+  if(!arr.length){
+    host.innerHTML = `<div class="muted">No tasks.</div>`;
+  }else{
+    host.innerHTML = "";
+    arr.forEach(t=>{
+      const div = document.createElement("div");
+      div.className="historyItem";
+      div.innerHTML = `
+        <div class="row" style="justify-content:space-between;">
+          <div>
+            <div><strong>${escapeHtml(t.text)}</strong></div>
+            <div class="tiny">${escapeHtml(t.slotId==="any" ? "Any slot" : (slotMap.get(t.slotId)||t.slotId))}</div>
+          </div>
+          <div class="right">
+            <button class="btn ${t.done?"":"primary"}" data-tog="${t.id}">${t.done?"Undone":"Done"}</button>
+            <button class="btn danger" data-del="${t.id}">Delete</button>
+          </div>
+        </div>
+      `;
+      host.appendChild(div);
+    });
+
+    $$("[data-tog]", host).forEach(b=>{
+      b.onclick = ()=>{
+        const it = getTodos(dk).find(x=>x.id===b.dataset.tog);
+        if(!it) return;
+        it.done = !it.done;
+        saveDB();
+        toast("Updated");
+        renderTodo(root);
+      };
+    });
+    $$("[data-del]", host).forEach(b=>{
+      b.onclick = ()=>{
+        if(!confirm("Delete task?")) return;
+        DB.todos[dk] = getTodos(dk).filter(x=>x.id!==b.dataset.del);
+        saveDB();
+        toast("Deleted");
+        renderTodo(root);
+      };
+    });
+  }
+}
+
+/* -------- CHAPTERS -------- */
+function renderChapters(root){
+  root.className = "grid two";
+  const left = document.createElement("div"); left.className="card";
+  const right = document.createElement("div"); right.className="card";
+
+  left.innerHTML = `
+    <h2>Chapters (preloaded)</h2>
+    <div class="muted">Search → expand → tick checklist → Save.</div>
+    <div class="hr"></div>
+
+    <div class="form cols2">
+      <div><label>Search</label><input id="chSearch" placeholder="NLM / GOC / Integration"/></div>
+      <div>
+        <label>Subject</label>
+        <select id="chSubj">
+          <option value="all">All</option>
+          ${Object.keys(ALL_CHAPTERS).map(s=>`<option value="${s}">${s}</option>`).join("")}
+        </select>
+      </div>
+    </div>
+
+    <div class="form cols2">
+      <div>
+        <label>Level filter</label>
+        <select id="chLevel">
+          <option value="all">All</option>
+          ${CHAPTER_LEVELS.map(x=>`<option value="${x}">${x}</option>`).join("")}
+        </select>
+      </div>
+      <div class="right" style="align-items:flex-end;">
+        <button class="btn" id="addCustomCh">Add custom chapter</button>
+      </div>
+    </div>
+  `;
+
+  right.innerHTML = `
+    <div class="row">
+      <div>
+        <h2>Chapter list</h2>
+        <div class="muted">Total: ${DB.chapters.length}</div>
+      </div>
+      <div class="pill"><strong>Tip:</strong> Update levels weekly</div>
+    </div>
+    <div class="hr"></div>
+    <div id="chapterList" class="list"></div>
+  `;
+
+  root.appendChild(left);
+  root.appendChild(right);
+
+  $("#addCustomCh").onclick = ()=>{
+    const name = prompt("Custom chapter name?");
+    if(!name) return;
+    const subject = prompt("Subject? (Physics / Physical Chem / Inorganic Chem / Organic Chem / Maths)", "Physics") || "Other";
+    DB.chapters.push({ id: uid("ch"), subject, name: name.trim(), level:"Theory Basic", checks: defaultChecks(), createdAt: Date.now(), updatedAt: Date.now() });
+    DB.chapters.sort((a,b)=> (a.subject+a.name).localeCompare(b.subject+b.name));
+    saveDB();
+    toast("Added");
+    render();
+  };
+
+  $("#chSearch").oninput = renderChapterList;
+  $("#chSubj").onchange = renderChapterList;
+  $("#chLevel").onchange = renderChapterList;
+
+  function checkChip(key, label, ch){
+    const checked = ch.checks?.[key] ? "checked" : "";
+    return `<span class="c"><input type="checkbox" data-ck="${key}" ${checked}/> ${escapeHtml(label)}</span>`;
+  }
+
+  function renderChapterList(){
+    const host = $("#chapterList");
+    const search = ($("#chSearch").value||"").trim().toLowerCase();
+    const fSubj = $("#chSubj").value;
+    const fLevel = $("#chLevel").value;
+
+    let items = DB.chapters.slice();
+    if(fSubj!=="all") items = items.filter(c=>c.subject===fSubj);
+    if(fLevel!=="all") items = items.filter(c=>c.level===fLevel);
+    if(search) items = items.filter(c=> (c.name||"").toLowerCase().includes(search));
+
+    if(!items.length){
+      host.innerHTML = `<div class="muted">No chapters match filter.</div>`;
+      return;
+    }
+
+    host.innerHTML = "";
+    items.forEach(ch=>{
+      const p = chapterProgress(ch);
+      const det = document.createElement("details");
+      det.className="chapter";
+      det.innerHTML = `
+        <summary>
+          <div>
+            ${escapeHtml(ch.subject)} • ${escapeHtml(ch.name)}
+            <div class="tiny">Progress: ${p.done}/${p.total} (${p.pct.toFixed(0)}%)</div>
+          </div>
+          <div class="badge">${escapeHtml(ch.level)}</div>
+        </summary>
+        <div class="chapterBody">
+          <div class="form cols2">
+            <div>
+              <label>Level reached</label>
+              <select data-k="level">
+                ${CHAPTER_LEVELS.map(x=>`<option value="${x}" ${ch.level===x?"selected":""}>${x}</option>`).join("")}
+              </select>
+            </div>
+            <div>
+              <label>Updated</label>
+              <input disabled value="${new Date(ch.updatedAt||Date.now()).toLocaleString()}" />
+            </div>
+          </div>
+
+          <div class="hr"></div>
+
+          <label>Checklist</label>
+          <div class="checkRow">
+            ${CHAPTER_CHECK_KEYS.map(([k,lab])=>checkChip(k,lab,ch)).join("")}
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="right">
+            <button class="btn" data-addtodo="${ch.id}">Add To‑Do (today)</button>
+            <button class="btn danger" data-del="${ch.id}">Delete</button>
+            <button class="btn primary" data-save="${ch.id}">Save</button>
+          </div>
+        </div>
+      `;
+      host.appendChild(det);
+    });
+
+    function getById(id){ return DB.chapters.find(x=>x.id===id); }
+
+    $$("[data-save]", host).forEach(b=>{
+      b.onclick = ()=>{
+        const id=b.dataset.save;
+        const ch = getById(id);
+        if(!ch) return;
+        const det = b.closest("details");
+        const levelSel = $('select[data-k="level"]', det);
+        ch.level = levelSel.value;
+
+        const checks = {...ch.checks};
+        $$('input[type="checkbox"][data-ck]', det).forEach(cb=>{
+          checks[cb.dataset.ck] = cb.checked;
+        });
+        ch.checks = checks;
+        ch.updatedAt = Date.now();
+
+        saveDB();
+        toast("Saved");
+        renderChapterList();
+      };
+    });
+
+    $$("[data-del]", host).forEach(b=>{
+      b.onclick = ()=>{
+        if(!confirm("Delete this chapter?")) return;
+        DB.chapters = DB.chapters.filter(x=>x.id!==b.dataset.del);
+        saveDB();
+        toast("Deleted");
+        renderChapterList();
+      };
+    });
+
+    $$("[data-addtodo]", host).forEach(b=>{
+      b.onclick = ()=>{
+        const ch = getById(b.dataset.addtodo);
+        if(!ch) return;
+        const text = prompt("To‑Do text for today?", `${ch.subject}: ${ch.name} - PYQ + Revision`);
+        if(!text) return;
+        getTodos(todayKey()).unshift({ id: uid("todo"), slotId:"any", text, done:false, createdAt: Date.now() });
+        saveDB();
+        toast("Added to today’s To‑Do");
+      };
+    });
+  }
+
+  renderChapterList();
+}
+
+/* -------- HISTORY -------- */
+function renderHistory(root){
+  root.className="grid two";
+  const left=document.createElement("div"); left.className="card";
+  const right=document.createElement("div"); right.className="card";
+
+  const keys = Object.keys(DB.logs).sort().reverse().slice(0,60);
+
+  left.innerHTML=`
+    <div class="row" style="justify-content:space-between;">
+      <div><h2>History</h2><div class="muted">Export/Import = safest backup</div></div>
+      <div class="right">
+        <button class="btn" id="exportJson">Export JSON</button>
+        <label class="btn" style="display:inline-flex; align-items:center; gap:8px;">
+          Import JSON
+          <input id="importJson" type="file" accept="application/json" style="display:none" />
+        </label>
+      </div>
+    </div>
+    <div class="hr"></div>
+    <div id="histList" class="list"></div>
+  `;
+
+  right.innerHTML=`
+    <h2>Selected day</h2>
+    <div class="pill"><strong>${formatDateHuman(selectedDateKey)}</strong> <span style="opacity:.7">•</span> <span class="muted">${selectedDateKey}</span></div>
+    <div class="hr"></div>
+    <div id="dayDetail"></div>
+  `;
+
+  root.appendChild(left); root.appendChild(right);
+
+  $("#exportJson").onclick = ()=>{
+    const blob = new Blob([JSON.stringify(DB,null,2)], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href=url;
+    a.download = `jee_tracker_backup_${todayKey()}.json`;
+    document.body.appendChild(a);
+    a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  $("#importJson").onchange = async (ev)=>{
+    const file = ev.target.files?.[0];
+    if(!file) return;
+    const txt = await file.text();
+    try{
+      const parsed = JSON.parse(txt);
+      DB = parsed;
+      if(!DB.settings) DB.settings = emptyDB().settings;
+      DB.settings.focusScaleMax = 5;
+      if(!DB.settings.github) DB.settings.github = { enabled:false, gistId:"", token:"", autoSync:false };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(DB));
+      seedChaptersIfEmpty();
+      toast("Imported");
+      render();
+    }catch(e){
+      alert("Import failed. Invalid JSON.");
+    }
+  };
+
+  const list=$("#histList");
+  if(!keys.length){
+    list.innerHTML=`<div class="muted">No history yet.</div>`;
+  }else{
+    keys.forEach(k=>{
+      const s = computeDaySummary(k);
+      const item=document.createElement("div");
+      item.className="historyItem";
+      item.innerHTML=`
+        <div class="row" style="justify-content:space-between;">
+          <div>
+            <div><strong>${formatDateHuman(k)}</strong> <span class="muted">(${k})</span></div>
+            <div class="muted">Minutes: ${s.totalMins} • Focus: ${s.focusAvg?s.focusAvg.toFixed(2):"—"} • Distraction: ${s.distraction} • Done: ${s.completed}/${s.totalSlots}</div>
+          </div>
+          <button class="btn primary" data-open="${k}">Open</button>
+        </div>
+      `;
+      list.appendChild(item);
+    });
+    $$("[data-open]").forEach(b=>{
+      b.onclick=()=>{ selectedDateKey=b.dataset.open; currentPage="today"; render(); };
+    });
+  }
+
+  const s = computeDaySummary(selectedDateKey);
+  const t = todosSummary(selectedDateKey);
+  $("#dayDetail").innerHTML = `
+    <div class="kpi">
+      <div class="box"><div class="small">Minutes</div><div class="big">${s.totalMins}</div><div class="small">Completion: ${s.completionPct.toFixed(0)}%</div></div>
+      <div class="box"><div class="small">Distraction</div><div class="big">${s.distraction}</div><div class="small">minutes</div></div>
+      <div class="box"><div class="small">To‑Do</div><div class="big">${t.done}/${t.total}</div><div class="small">Tasks</div></div>
+    </div>
+  `;
+}
+
+/* -------- ANALYTICS -------- */
+function renderAnalytics(root){
+  root.className="grid four";
+
+  const cards = [
+    {id:"aFocusSlot", title:"Avg Focus by Slot", sub:"All time"},
+    {id:"aMins14", title:"Last 14 Days: Minutes", sub:"Consistency"},
+    {id:"aDist14", title:"Last 14 Days: Distraction (mins)", sub:"Distraction trend"},
+    {id:"aComp14", title:"Last 14 Days: Completion %", sub:"Slots done trend"},
+    {id:"aTodo14", title:"Last 14 Days: To‑Do Done %", sub:"Task consistency"},
+  ];
+
+  cards.forEach(c=>{
+    const div=document.createElement("div");
+    div.className="card";
+    div.innerHTML = `<h2>${c.title}</h2><div class="muted">${c.sub}</div><div style="height:10px"></div><canvas id="${c.id}" width="900" height="520"></canvas>`;
+    root.appendChild(div);
+  });
+
+  const slots = trackableSlots();
+  const focusLabels = slots.map(s=>s.name);
+  const focusValues = slots.map(s=>{
+    let sum=0,cnt=0;
+    for(const day of Object.values(DB.logs)){
+      const e=day[s.id];
+      if(e && e.focus && e.done!=="no"){ sum+=Number(e.focus); cnt++; }
+    }
+    return cnt?sum/cnt:0;
+  });
+  drawBarChart($("#aFocusSlot"), focusLabels, focusValues, {maxY:5, yLabel:"Focus (1–5)"});
+
+  const labels14=[], mins14=[], dist14=[], comp14=[], todo14=[];
+  const now=new Date();
+  for(let i=13;i>=0;i--){
+    const d=new Date(now); d.setDate(d.getDate()-i);
+    const k=todayKey(d);
+    labels14.push(k.slice(5));
+    const s=computeDaySummary(k);
+    mins14.push(s.totalMins||0);
+    dist14.push(s.distraction||0);
+    comp14.push(s.completionPct||0);
+    const t=getTodos(k);
+    todo14.push(t.length ? (t.filter(x=>x.done).length/t.length)*100 : 0);
+  }
+  drawLineChart($("#aMins14"), labels14, mins14, {yLabel:"Minutes"});
+  drawLineChart($("#aDist14"), labels14, dist14, {yLabel:"Distraction (mins)"});
+  drawLineChart($("#aComp14"), labels14, comp14, {yLabel:"Completion %"});
+  drawLineChart($("#aTodo14"), labels14, todo14, {yLabel:"To‑Do done %"});
+}
+
+/* -------- REPORTS -------- */
+function weekStartMonday(dateKey){
+  const d = dateKeyToDate(dateKey);
+  const day = d.getDay();
+  const diff = (day===0 ? -6 : (1-day));
+  d.setDate(d.getDate()+diff);
+  return todayKey(d);
+}
+function weekEndSunday(dateKey){
+  const d = dateKeyToDate(weekStartMonday(dateKey));
+  d.setDate(d.getDate()+6);
+  return todayKey(d);
+}
+function rangeDateKeys(startKey,endKey){
+  const a=dateKeyToDate(startKey), b=dateKeyToDate(endKey);
+  const out=[]; const d=new Date(a);
+  while(d<=b){ out.push(todayKey(d)); d.setDate(d.getDate()+1); }
+  return out;
+}
+function monthRange(dateKey){
+  const d=dateKeyToDate(dateKey);
+  const y=d.getFullYear(), m=d.getMonth();
+  const start=new Date(y,m,1);
+  const end=new Date(y,m+1,0);
+  return {startKey:todayKey(start), endKey:todayKey(end)};
+}
+function computeStreak(minMins){
+  let streak=0;
+  const now=new Date();
+  for(let i=0;i<3650;i++){
+    const d=new Date(now); d.setDate(d.getDate()-i);
+    const k=todayKey(d);
+    if((computeDaySummary(k).totalMins||0) >= minMins) streak++;
+    else break;
+  }
+  return streak;
+}
+
+function renderReports(root){
+  root.className="grid two";
+  const left=document.createElement("div"); left.className="card";
+  const right=document.createElement("div"); right.className="card";
+
+  left.innerHTML=`
+    <div class="row" style="justify-content:space-between;">
+      <div><h2>Reports</h2><div class="muted">Weekly/Monthly summary + distraction included</div></div>
+      <div class="right">
+        <button class="btn ${reportMode==="weekly"?"primary":""}" id="wBtn">Weekly</button>
+        <button class="btn ${reportMode==="monthly"?"primary":""}" id="mBtn">Monthly</button>
+      </div>
+    </div>
+    <div class="hr"></div>
+    <div id="repBody"></div>
+  `;
+
+  right.innerHTML=`
+    <h2>Insights</h2>
+    <div class="muted">Action lines</div>
+    <div class="hr"></div>
+    <div id="ins" class="list"></div>
+  `;
+
+  root.appendChild(left); root.appendChild(right);
+
+  $("#wBtn").onclick=()=>{ reportMode="weekly"; render(); };
+  $("#mBtn").onclick=()=>{ reportMode="monthly"; render(); };
+
+  let startKey,endKey,title;
+  if(reportMode==="weekly"){
+    startKey=weekStartMonday(selectedDateKey);
+    endKey=weekEndSunday(selectedDateKey);
+    title=`Week: ${startKey} → ${endKey}`;
+  }else{
+    const r=monthRange(selectedDateKey);
+    startKey=r.startKey; endKey=r.endKey;
+    title=dateKeyToDate(selectedDateKey).toLocaleDateString(undefined,{month:"long", year:"numeric"});
+  }
+
+  const keys=rangeDateKeys(startKey,endKey);
+  const labels = keys.map(k => reportMode==="weekly" ? dateKeyToDate(k).toLocaleDateString(undefined,{weekday:"short"}) : k.slice(8));
+
+  let totalMins=0, totalDist=0, todoTotal=0, todoDone=0, qA=0,qC=0;
+  const dayMins=[], dayDist=[], dayAcc=[], dayTodo=[];
+  for(const k of keys){
+    const s = computeDaySummary(k);
+    totalMins += s.totalMins||0;
+    totalDist += s.distraction||0;
+    qA += s.qA||0;
+    qC += s.qC||0;
+
+    dayMins.push(s.totalMins||0);
+    dayDist.push(s.distraction||0);
+    dayAcc.push(s.qA ? s.acc : 0);
+
+    const t=getTodos(k);
+    todoTotal += t.length;
+    todoDone += t.filter(x=>x.done).length;
+    dayTodo.push(t.length ? (t.filter(x=>x.done).length/t.length)*100 : 0);
+  }
+
+  const todoPct = todoTotal ? (todoDone/todoTotal)*100 : 0;
+  const rangeAcc = qA ? (qC/qA)*100 : 0;
+
+  $("#repBody").innerHTML=`
+    <div class="pill"><strong>${escapeHtml(title)}</strong></div>
+    <div class="hr"></div>
+
+    <div class="kpi">
+      <div class="box"><div class="small">Total minutes</div><div class="big">${totalMins}</div><div class="small">Avg/day: ${(totalMins/keys.length).toFixed(0)}</div></div>
+      <div class="box"><div class="small">Total distraction</div><div class="big">${totalDist}</div><div class="small">mins</div></div>
+      <div class="box"><div class="small">Accuracy</div><div class="big">${qA?rangeAcc.toFixed(1)+"%":"—"}</div><div class="small">Questions: ${qA}</div></div>
+      <div class="box"><div class="small">To‑Do</div><div class="big">${todoDone}/${todoTotal}</div><div class="small">Done %: ${todoTotal?todoPct.toFixed(0)+"%":"—"}</div></div>
+    </div>
+
+    <div class="hr"></div>
+
+    <h2>Minutes trend</h2>
+    <canvas id="rMins" width="900" height="520"></canvas>
+
+    <div class="hr"></div>
+
+    <h2>Distraction trend</h2>
+    <canvas id="rDist" width="900" height="520"></canvas>
+
+    <div class="hr"></div>
+
+    <h2>Accuracy trend</h2>
+    <canvas id="rAcc" width="900" height="520"></canvas>
+
+    <div class="hr"></div>
+
+    <h2>To‑Do trend</h2>
+    <canvas id="rTodo" width="900" height="520"></canvas>
+  `;
+
+  drawLineChart($("#rMins"), labels, dayMins, {yLabel:"Minutes"});
+  drawLineChart($("#rDist"), labels, dayDist, {yLabel:"Distraction (mins)"});
+  drawLineChart($("#rAcc"), labels, dayAcc, {yLabel:"Accuracy %"});
+  drawLineChart($("#rTodo"), labels, dayTodo, {yLabel:"To‑Do done %"});
+
+  const ins=$("#ins");
+  ins.innerHTML="";
+  const suggestions = [
+    (totalDist/keys.length)>30 ? "Distraction high: phone blocks + fixed breaks." : "Distraction controlled.",
+    (totalMins/keys.length)<180 ? "Minutes low: add 1 practice block." : "Minutes consistency ok.",
+    qA && rangeAcc<60 ? "Accuracy low: error log + redo + untimed practice." : "Accuracy ok: timed sets."
+  ];
+  suggestions.forEach(t=>{
+    const d=document.createElement("div");
+    d.className="historyItem";
+    d.innerHTML=`<div><strong>${escapeHtml(t)}</strong></div>`;
+    ins.appendChild(d);
+  });
+}
+
+/* -------- BACKLOG -------- */
+function renderBacklog(root){
+  root.className="grid two";
+  const left=document.createElement("div"); left.className="card";
+  const right=document.createElement("div"); right.className="card";
+
+  left.innerHTML=`
+    <h2>Backlog / Homework</h2>
+    <div class="muted">Vibrant DPP/Module/Sheet list.</div>
+    <div class="hr"></div>
+
+    <div class="form cols2">
+      <div><label>Title</label><input id="bTitle" placeholder="e.g., PHY DPP-05 NLM"/></div>
+      <div><label>Subject</label><select id="bSubj">${SUBJECTS.map(s=>`<option value="${s}">${s}</option>`).join("")}</select></div>
+    </div>
+    <div class="form cols3">
+      <div><label>Type</label><select id="bType">${TASK_TYPES.map(s=>`<option value="${s}">${s}</option>`).join("")}</select></div>
+      <div><label>Priority</label><select id="bPr">${PRIORITIES.map(s=>`<option value="${s}">${s}</option>`).join("")}</select></div>
+      <div><label>Due date</label><input id="bDue" type="date"/></div>
+    </div>
+    <div class="form">
+      <div><label>Notes</label><input id="bNotes" placeholder="optional"/></div>
+      <div class="right"><button class="btn primary" id="bAdd">Add task</button></div>
+    </div>
+  `;
+
+  right.innerHTML=`
+    <div class="row" style="justify-content:space-between;">
+      <div><h2>Tasks</h2><div class="muted">Pending first</div></div>
+      <div class="right">
+        <button class="btn primary" id="fPending">Pending</button>
+        <button class="btn" id="fAll">All</button>
+        <button class="btn" id="fDone">Done</button>
+      </div>
+    </div>
+    <div class="hr"></div>
+    <div id="bList" class="list"></div>
+  `;
+
+  root.appendChild(left); root.appendChild(right);
+
+  $("#bAdd").onclick=()=>{
+    const title=($("#bTitle").value||"").trim();
+    if(!title) return toast("Title required");
+    DB.backlog.unshift({
+      id: uid("task"),
+      createdAt: Date.now(),
+      title,
+      subject: $("#bSubj").value,
+      type: $("#bType").value,
+      priority: $("#bPr").value,
+      dueDate: $("#bDue").value || "",
+      notes: ($("#bNotes").value||"").trim(),
+      status: "pending",
+      completedAt: null
+    });
+    saveDB();
+    toast("Added");
+    renderBacklog(root);
+  };
+
+  $("#fPending").onclick=()=>renderList("pending");
+  $("#fAll").onclick=()=>renderList("all");
+  $("#fDone").onclick=()=>renderList("done");
+
+  function renderList(filter){
+    const host=$("#bList");
+    let items = DB.backlog.slice();
+    if(filter==="pending") items = items.filter(t=>t.status!=="done");
+    if(filter==="done") items = items.filter(t=>t.status==="done");
+
+    if(!items.length){ host.innerHTML=`<div class="muted">No tasks.</div>`; return; }
+
+    host.innerHTML="";
+    const nowKey=todayKey();
+    items.forEach(t=>{
+      const overdue = (t.status!=="done" && t.dueDate && t.dueDate < nowKey);
+      const div=document.createElement("div");
+      div.className="historyItem";
+      div.innerHTML=`
+        <div class="row" style="justify-content:space-between;">
+          <div>
+            <div><strong>${escapeHtml(t.title)}</strong></div>
+            <div class="muted">${escapeHtml(t.subject)} • ${escapeHtml(t.type)} • ${escapeHtml(t.priority)} ${t.dueDate?`• Due: ${escapeHtml(t.dueDate)}`:""} ${overdue?`<span class="dangerText">• OVERDUE</span>`:""}</div>
+            ${t.notes?`<div class="tiny">Notes: ${escapeHtml(t.notes)}</div>`:""}
+          </div>
+          <div class="right">
+            ${t.status==="done" ? `<span class="badge">DONE</span>` : `<button class="btn primary" data-done="${t.id}">Done</button>`}
+            <button class="btn danger" data-del="${t.id}">Del</button>
+          </div>
+        </div>
+      `;
+      host.appendChild(div);
+    });
+
+    $$("[data-done]", host).forEach(b=>{
+      b.onclick=()=>{
+        const t=DB.backlog.find(x=>x.id===b.dataset.done);
+        if(!t) return;
+        t.status="done"; t.completedAt=Date.now();
+        saveDB(); toast("Done");
+        renderList(filter);
+      };
+    });
+    $$("[data-del]", host).forEach(b=>{
+      b.onclick=()=>{
+        if(!confirm("Delete task?")) return;
+        DB.backlog = DB.backlog.filter(x=>x.id!==b.dataset.del);
+        saveDB(); toast("Deleted");
+        renderList(filter);
+      };
+    });
+  }
+
+  renderList("pending");
+}
+
+/* -------- ERROR LOG (fixed) -------- */
+function renderErrors(root){
+  root.className="grid two";
+  const left=document.createElement("div"); left.className="card";
+  const right=document.createElement("div"); right.className="card";
+  const today=todayKey();
+
+  left.innerHTML=`
+    <h2>Error Log</h2>
+    <div class="muted">Add mistake + D+3/D+10/D+21 reattempt.</div>
+    <div class="hr"></div>
+
+    <div class="form cols2">
+      <div><label>Subject</label><select id="eSubj">${SUBJECTS.map(s=>`<option value="${s}">${s}</option>`).join("")}</select></div>
+      <div><label>Topic/Chapter</label><input id="eChap" placeholder="e.g., NLM friction"/></div>
+    </div>
+    <div class="form cols2">
+      <div><label>Source</label><input id="eSource" placeholder="DPP/Module/Test"/></div>
+      <div><label>Ref</label><input id="eRef" placeholder="Q no."/></div>
+    </div>
+    <div class="form cols2">
+      <div><label>Mistake type</label><select id="eType">${MISTAKE_TYPES.map(s=>`<option value="${s}">${s}</option>`).join("")}</select></div>
+      <div><label>Status</label><select id="eStatus"><option value="open">Open</option><option value="fixed">Fixed</option></select></div>
+    </div>
+    <div class="form">
+      <div><label>Correct concept (2–4 lines)</label><textarea id="eConcept"></textarea></div>
+      <div><label>Takeaway</label><input id="eTake" placeholder="1 line"/></div>
+      <div class="right"><button class="btn primary" id="eAdd">Add</button></div>
+    </div>
+  `;
+
+  right.innerHTML=`
+    <div class="row" style="justify-content:space-between;">
+      <div><h2>Due Today</h2><div class="muted">${today}</div></div>
+      <div class="right">
+        <button class="btn primary" id="efDue">Due</button>
+        <button class="btn" id="efOpen">Open</button>
+        <button class="btn" id="efAll">All</button>
+      </div>
+    </div>
+    <div class="hr"></div>
+    <div id="eList" class="list"></div>
+  `;
+
+  root.appendChild(left); root.appendChild(right);
+
+  $("#eAdd").onclick=()=>{
+    const subject=$("#eSubj").value;
+    const chapter=($("#eChap").value||"").trim();
+    const source=($("#eSource").value||"").trim()||"Unknown";
+    const qRef=($("#eRef").value||"").trim();
+    const mistakeType=$("#eType").value;
+    const correctConcept=($("#eConcept").value||"").trim();
+    const takeaway=($("#eTake").value||"").trim();
+    const status=$("#eStatus").value;
+
+    if(!chapter) return toast("Topic required");
+    if(!correctConcept) return toast("Write correct concept");
+
+    const base=dateKeyToDate(today);
+    const d3=new Date(base); d3.setDate(d3.getDate()+3);
+    const d10=new Date(base); d10.setDate(d10.getDate()+10);
+    const d21=new Date(base); d21.setDate(d21.getDate()+21);
+
+    DB.errorLog.unshift({
+      id: uid("err"),
+      createdAt: Date.now(),
+      dateKey: today,
+      subject, chapter, source, qRef, mistakeType,
+      correctConcept, takeaway,
+      status,
+      reattempts: [
+        { dateKey: todayKey(d3), done:false },
+        { dateKey: todayKey(d10), done:false },
+        { dateKey: todayKey(d21), done:false },
+      ]
+    });
+    saveDB();
+    toast("Added");
+    renderErrors(root);
+  };
+
+  $("#efDue").onclick=()=>renderList("due");
+  $("#efOpen").onclick=()=>renderList("open");
+  $("#efAll").onclick=()=>renderList("all");
+
+  function isDue(err){
+    return err.status!=="fixed" && (err.reattempts||[]).some(r=>r.dateKey===today && !r.done);
+  }
+
+  function renderList(filter){
+    const host=$("#eList");
+    let items=DB.errorLog.slice();
+    if(filter==="due") items=items.filter(isDue);
+    if(filter==="open") items=items.filter(e=>e.status!=="fixed");
+
+    if(!items.length){ host.innerHTML=`<div class="muted">No items.</div>`; return; }
+
+    host.innerHTML="";
+    items.forEach(e=>{
+      const due=isDue(e);
+      const div=document.createElement("div");
+      div.className="historyItem";
+      div.innerHTML=`
+        <div class="row" style="justify-content:space-between;">
+          <div>
+            <div><strong>${escapeHtml(e.subject)} • ${escapeHtml(e.chapter)}</strong> ${due?`<span class="badge">DUE</span>`:""} ${e.status==="fixed"?`<span class="badge">FIXED</span>`:""}</div>
+            <div class="muted">${escapeHtml(e.source||"")} ${e.qRef?`• Ref: ${escapeHtml(e.qRef)}`:""} • ${escapeHtml(e.mistakeType||"")}</div>
+          </div>
+          <div class="right">
+            ${due?`<button class="btn primary" data-reattempt="${e.id}">Reattempt done</button>`:""}
+            ${e.status!=="fixed"?`<button class="btn" data-fix="${e.id}">Mark fixed</button>`:`<button class="btn" data-open="${e.id}">Re-open</button>`}
+            <button class="btn danger" data-del="${e.id}">Del</button>
+          </div>
+        </div>
+        <div class="tiny">Correct concept</div>
+        <div style="white-space:pre-wrap;">${escapeHtml(e.correctConcept||"")}</div>
+        ${e.takeaway?`<div class="tiny">Takeaway: ${escapeHtml(e.takeaway)}</div>`:""}
+        <div class="tiny">Reattempts: ${(e.reattempts||[]).map(r=>`${r.dateKey}:${r.done?"✓":"—"}`).join(" | ")}</div>
+      `;
+      host.appendChild(div);
+    });
+
+    $$("[data-reattempt]", host).forEach(b=>{
+      b.onclick=()=>{
+        const e=DB.errorLog.find(x=>x.id===b.dataset.reattempt);
+        if(!e) return;
+        const r=(e.reattempts||[]).find(x=>x.dateKey===today && !x.done);
+        if(r) r.done=true;
+        saveDB(); toast("Marked");
+        renderList(filter);
+      };
+    });
+    $$("[data-fix]", host).forEach(b=>{
+      b.onclick=()=>{
+        const e=DB.errorLog.find(x=>x.id===b.dataset.fix);
+        if(!e) return;
+        e.status="fixed";
+        saveDB(); toast("Fixed");
+        renderList(filter);
+      };
+    });
+    $$("[data-open]", host).forEach(b=>{
+      b.onclick=()=>{
+        const e=DB.errorLog.find(x=>x.id===b.dataset.open);
+        if(!e) return;
+        e.status="open";
+        saveDB(); toast("Re-opened");
+        renderList(filter);
+      };
+    });
+    $$("[data-del]", host).forEach(b=>{
+      b.onclick=()=>{
+        if(!confirm("Delete error?")) return;
+        DB.errorLog = DB.errorLog.filter(x=>x.id!==b.dataset.del);
+        saveDB(); toast("Deleted");
+        renderList(filter);
+      };
+    });
+  }
+
+  renderList("due");
+}
+
+/* -------- TESTS -------- */
+function renderTests(root){
+  root.className="grid two";
+  const left=document.createElement("div"); left.className="card";
+  const right=document.createElement("div"); right.className="card";
+
+  left.innerHTML=`
+    <h2>Tests (Monthly)</h2>
+    <div class="muted">Store score + weak chapters + mistake patterns.</div>
+    <div class="hr"></div>
+
+    <div class="form cols2">
+      <div><label>Date</label><input id="tDate" type="date" value="${todayKey()}"/></div>
+      <div><label>Name</label><input id="tName" placeholder="Vibrant Monthly Test - 01"/></div>
+    </div>
+    <div class="form"><div><label>Syllabus</label><input id="tSyl" placeholder="chapters/range"/></div></div>
+
+    <div class="form cols4">
+      <div><label>Max</label><input id="tMax" type="number" value="300"/></div>
+      <div><label>Score</label><input id="tScore" type="number" value="0"/></div>
+      <div><label>Attempted</label><input id="tAtt" type="number" value="0"/></div>
+      <div><label>Correct</label><input id="tCor" type="number" value="0"/></div>
+    </div>
+    <div class="form cols4">
+      <div><label>Wrong</label><input id="tWr" type="number" value="0"/></div>
+      <div><label>P</label><input id="tP" type="number" value="0"/></div>
+      <div><label>C</label><input id="tC" type="number" value="0"/></div>
+      <div><label>M</label><input id="tM" type="number" value="0"/></div>
+    </div>
+
+    <div class="form">
+      <div><label>Weak chapters (comma)</label><input id="tWeak"/></div>
+      <div><label>Mistake patterns (comma)</label><input id="tMist"/></div>
+      <div><label>Notes</label><textarea id="tNotes"></textarea></div>
+      <div class="right"><button class="btn primary" id="tAdd">Add Test</button></div>
+    </div>
+  `;
+
+  right.innerHTML=`
+    <div class="row" style="justify-content:space-between;">
+      <div><h2>Test History</h2><div class="muted">Latest first</div></div>
+      <div class="pill"><strong>Total:</strong> ${DB.tests.length}</div>
+    </div>
+    <div class="hr"></div>
+    <div id="tList" class="list"></div>
+  `;
+
+  root.appendChild(left); root.appendChild(right);
+
+  $("#tAdd").onclick=()=>{
+    const name=($("#tName").value||"").trim();
+    if(!name) return toast("Test name required");
+
+    DB.tests.unshift({
+      id: uid("test"),
+      createdAt: Date.now(),
+      dateKey: $("#tDate").value || todayKey(),
+      name,
+      syllabus: ($("#tSyl").value||"").trim(),
+      maxMarks: Number($("#tMax").value||0),
+      score: Number($("#tScore").value||0),
+      attempted: Number($("#tAtt").value||0),
+      correct: Number($("#tCor").value||0),
+      wrong: Number($("#tWr").value||0),
+      p: Number($("#tP").value||0),
+      c: Number($("#tC").value||0),
+      m: Number($("#tM").value||0),
+      weakChapters: ($("#tWeak").value||"").split(",").map(x=>x.trim()).filter(Boolean),
+      mistakePatterns: ($("#tMist").value||"").split(",").map(x=>x.trim()).filter(Boolean),
+      notes: ($("#tNotes").value||"").trim()
+    });
+    saveDB();
+    toast("Added");
+    renderTests(root);
+  };
+
+  const host=$("#tList");
+  if(!DB.tests.length){
+    host.innerHTML=`<div class="muted">No tests saved.</div>`;
+  }else{
+    host.innerHTML="";
+    DB.tests.forEach(t=>{
+      const acc = t.attempted ? (t.correct/t.attempted)*100 : 0;
+      const div=document.createElement("div");
+      div.className="historyItem";
+      div.innerHTML=`
+        <div class="row" style="justify-content:space-between;">
+          <div>
+            <div><strong>${escapeHtml(t.name)}</strong> <span class="muted">• ${escapeHtml(t.dateKey)}</span></div>
+            <div class="muted">Score: ${t.score}/${t.maxMarks} • PCM: ${t.p}/${t.c}/${t.m} • Acc: ${t.attempted?acc.toFixed(1)+"%":"—"}</div>
+            ${t.weakChapters?.length?`<div class="tiny">Weak: ${escapeHtml(t.weakChapters.join(", "))}</div>`:""}
+            ${t.mistakePatterns?.length?`<div class="tiny">Mistakes: ${escapeHtml(t.mistakePatterns.join(", "))}</div>`:""}
+            ${t.notes?`<div style="white-space:pre-wrap;">${escapeHtml(t.notes)}</div>`:""}
+          </div>
+          <div class="right"><button class="btn danger" data-del="${t.id}">Del</button></div>
+        </div>
+      `;
+      host.appendChild(div);
+    });
+
+    $$("[data-del]", host).forEach(b=>{
+      b.onclick=()=>{
+        if(!confirm("Delete test?")) return;
+        DB.tests = DB.tests.filter(x=>x.id!==b.dataset.del);
+        saveDB(); toast("Deleted");
+        renderTests(root);
+      };
+    });
+  }
+}
+
+/* -------- SETTINGS -------- */
+function renderSettings(root){
+  root.className="grid two";
+  const left=document.createElement("div"); left.className="card";
+  const right=document.createElement("div"); right.className="card";
+
+  const protocolWarn = location.protocol === "file:" ? `
+    <div class="historyItem">
+      <div class="dangerText"><strong>Sync warning:</strong> You are running from file://. GitHub Sync is unstable here.</div>
+      <div class="muted">Use GitHub Pages URL (https://...) on both PC & phone for automatic sync.</div>
+    </div>` : "";
+
+  left.innerHTML=`
+    <h2>Reminders</h2>
+    <div class="muted">In-app reminder (slot end + offset). Works when app open.</div>
+    <div class="hr"></div>
+
+    <div class="form cols2">
+      <div>
+        <label>Enable reminders</label>
+        <select id="rEn">
+          <option value="true" ${DB.settings.remindersEnabled?"selected":""}>Yes</option>
+          <option value="false" ${!DB.settings.remindersEnabled?"selected":""}>No</option>
+        </select>
+      </div>
+      <div>
+        <label>Offset after end (mins)</label>
+        <input id="rOff" type="number" min="0" step="1" value="${DB.settings.reminderOffsetMins}"/>
+      </div>
+    </div>
+
+    <div class="form cols2">
+      <div>
+        <label>Remind only if slot not updated</label>
+        <select id="rOnly">
+          <option value="true" ${DB.settings.reminderOnlyIfNotUpdated?"selected":""}>Yes</option>
+          <option value="false" ${!DB.settings.reminderOnlyIfNotUpdated?"selected":""}>No</option>
+        </select>
+      </div>
+      <div class="right" style="align-items:flex-end;">
+        <button class="btn primary" id="rSave">Save & schedule</button>
+      </div>
+    </div>
+
+    <div class="hr"></div>
+
+    ${protocolWarn}
+
+    <h2>GitHub Sync (Gist)</h2>
+    <div class="muted">Automatic phone↔PC sync: same gist+token dono devices me set karo.</div>
+    <div class="tiny">Gist file name must be: <strong>jee-tracker.json</strong></div>
+
+    <div class="hr"></div>
+
+    <div class="form cols2">
+      <div>
+        <label>Enable GitHub sync</label>
+        <select id="gEn">
+          <option value="false" ${!DB.settings.github.enabled?"selected":""}>No</option>
+          <option value="true" ${DB.settings.github.enabled?"selected":""}>Yes</option>
+        </select>
+      </div>
+      <div>
+        <label>Auto sync</label>
+        <select id="gAuto">
+          <option value="false" ${!DB.settings.github.autoSync?"selected":""}>OFF</option>
+          <option value="true" ${DB.settings.github.autoSync?"selected":""}>ON</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form cols2">
+      <div>
+        <label>Gist ID</label>
+        <input id="gId" placeholder="paste gist id" value="${escapeHtml(DB.settings.github.gistId||"")}"/>
+      </div>
+      <div>
+        <label>Token (scope: gist)</label>
+        <input id="gTok" placeholder="paste token" value="${escapeHtml(DB.settings.github.token||"")}"/>
+      </div>
+    </div>
+
+    <div class="right">
+      <button class="btn" id="gPull">Pull</button>
+      <button class="btn" id="gPush">Push</button>
+      <button class="btn primary" id="gSmart">Smart Sync</button>
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="pill"><strong>Last local update:</strong> ${new Date(DB.meta.updatedAt).toLocaleString()}</div>
+    <div class="pill" style="margin-left:8px;"><strong>Last cloud sync:</strong> ${DB.meta.lastCloudSyncAt?new Date(DB.meta.lastCloudSyncAt).toLocaleString():"—"}</div>
+
+    <div class="hr"></div>
+
+    <div class="historyItem">
+      <div class="muted"><strong>Last cloud error:</strong></div>
+      <div class="dangerText">${escapeHtml(DB.meta.lastCloudError || "—")}</div>
+      <div class="tiny">If you see HTTP 403/429: wait 5–10 min, keep AutoSync OFF, then Smart Sync once.</div>
+    </div>
+
+    <div class="hr"></div>
+
+    <h2>Reset</h2>
+    <div class="muted dangerText">Wipe ALL local data (cannot undo).</div>
+    <div style="height:10px"></div>
+    <button class="btn danger" id="wipe">Wipe local data</button>
+  `;
+
+  right.innerHTML=`
+    <h2>Timetable</h2>
+    <div class="muted">Edit timings. Track=Yes means visible in Today.</div>
+    <div class="hr"></div>
+    <div id="tt" class="list"></div>
+    <div class="right">
+      <button class="btn primary" id="ttSave">Save timetable</button>
+    </div>
+
+    <div class="hr"></div>
+
+    <h2>Streak</h2>
+    <div class="form cols2">
+      <div>
+        <label>Streak rule (mins/day)</label>
+        <input id="streak" type="number" min="0" step="10" value="${DB.settings.streakMinMins}"/>
+      </div>
+      <div class="right" style="align-items:flex-end;">
+        <button class="btn" id="stSave">Save</button>
+      </div>
+    </div>
+  `;
+
+  root.appendChild(left); root.appendChild(right);
+
+  $("#rSave").onclick=()=>{
+    DB.settings.remindersEnabled = ($("#rEn").value==="true");
+    DB.settings.reminderOffsetMins = Number($("#rOff").value||2);
+    DB.settings.reminderOnlyIfNotUpdated = ($("#rOnly").value==="true");
+    saveDB();
+    scheduleRemindersForToday();
+    toast("Saved");
+  };
+
+  function applyGitHubSettingsFromUI(){
+    DB.settings.github.enabled = ($("#gEn").value==="true");
+    DB.settings.github.autoSync = ($("#gAuto").value==="true");
+    DB.settings.github.gistId = ($("#gId").value||"").trim();
+    DB.settings.github.token = ($("#gTok").value||"").trim();
+    saveDB();
+  }
+
+  $("#gPull").onclick=async()=>{ try{ applyGitHubSettingsFromUI(); await gistPull(true); }catch(e){ setCloudError(e.message); toast("Pull failed: "+e.message); } };
+  $("#gPush").onclick=async()=>{ try{ applyGitHubSettingsFromUI(); await gistPush(true); }catch(e){ setCloudError(e.message); toast("Push failed: "+e.message); } };
+  $("#gSmart").onclick=async()=>{ try{ applyGitHubSettingsFromUI(); await gistSmartSync(true); }catch(e){ setCloudError(e.message); toast("SmartSync failed: "+e.message); } };
+
+  $("#wipe").onclick=()=>{
+    if(!confirm("Wipe ALL local data?")) return;
+    localStorage.removeItem(STORAGE_KEY);
+    DB = emptyDB();
+    seedChaptersIfEmpty();
+    toast("Wiped");
+    render();
+  };
+
+  const tt = $("#tt");
+  tt.innerHTML = DB.settings.timetable.map((s,i)=>`
+    <div class="historyItem">
+      <div class="form cols4">
+        <div><label>Name</label><input data-tt="${i}" data-k="name" value="${escapeHtml(s.name)}"/></div>
+        <div><label>Start</label><input data-tt="${i}" data-k="start" type="time" value="${escapeHtml(s.start)}"/></div>
+        <div><label>End</label><input data-tt="${i}" data-k="end" type="time" value="${escapeHtml(s.end)}"/></div>
+        <div>
+          <label>Track?</label>
+          <select data-tt="${i}" data-k="track">
+            <option value="true" ${s.track?"selected":""}>Yes</option>
+            <option value="false" ${!s.track?"selected":""}>No</option>
+          </select>
+        </div>
+      </div>
+      <div class="tiny">Duration: ${minutesBetween(s.start,s.end)} min</div>
+    </div>
+  `).join("");
+
+  $("#ttSave").onclick=()=>{
+    const ttNew = DB.settings.timetable.map(x=>({...x}));
+    $$("[data-tt]").forEach(inp=>{
+      const i = Number(inp.dataset.tt);
+      const k = inp.dataset.k;
+      if(k==="track") ttNew[i][k] = (inp.value==="true");
+      else ttNew[i][k] = inp.value;
+    });
+    DB.settings.timetable = ttNew;
+    saveDB();
+    scheduleRemindersForToday();
+    toast("Saved");
+  };
+
+  $("#stSave").onclick=()=>{
+    DB.settings.streakMinMins = Number($("#streak").value||0);
+    saveDB();
+    toast("Saved");
+  };
+}
+
+/* =======================
+   BOOT
+======================= */
+$$(".tab").forEach(btn => btn.onclick = () => { currentPage = btn.dataset.page; render(); });
+
+render();
+scheduleRemindersForToday();
+setInterval(()=>{
+  const now=new Date();
+  if(now.getHours()===0 && now.getMinutes()===1) scheduleRemindersForToday();
+}, 60000);
+</script>
+</body>
+</html>
